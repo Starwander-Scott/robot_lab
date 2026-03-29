@@ -30,8 +30,8 @@ class MagicLabBotZ1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         "JOINT_KNEE_PITCH_R",
         "JOINT_ANKLE_PITCH_R",
         "JOINT_ANKLE_ROLL_R",
-        "joint_la1",
-        "joint_ra1",
+        # "joint_la1",
+        # "joint_ra1",
     ]
     # fmt: on
 
@@ -89,8 +89,8 @@ class MagicLabBotZ1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.joint_acc_l2.weight = -1.25e-7
         self.rewards.joint_acc_l2.params["asset_cfg"].joint_names = [".*_HIP_.*", ".*_KNEE_.*"]
         self.rewards.create_joint_deviation_l1_rewterm("joint_deviation_hip_l1", -0.1, [".*HIP_YAW.*", ".*HIP_ROLL.*"])
-        self.rewards.create_joint_deviation_l1_rewterm("joint_deviation_arms_l1", -0.1, [".*a1"])
-        # self.rewards.create_joint_deviation_l1_rewterm("joint_deviation_torso_l1", -0.1, ["pelvis"])
+        #self.rewards.create_joint_deviation_l1_rewterm("joint_deviation_arms_l1", -0.1, [".*a1"])
+        #self.rewards.create_joint_deviation_l1_rewterm("joint_deviation_torso_l1", -0.1, ["pelvis"])
         self.rewards.joint_pos_limits.weight = -0.5
         self.rewards.joint_vel_limits.weight = 0
         self.rewards.joint_power.weight = 0
@@ -155,3 +155,15 @@ class MagicLabBotZ1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_x = (-0.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
+
+
+        # ==============================
+        # 固定观测维度 = 47
+        # ==============================
+        
+        # 必须关闭的项（多一个都会变成51维！）
+        self.observations.policy.base_lin_vel = None
+        self.observations.policy.height_scan = None
+        self.observations.policy.contact_forces = None
+        self.observations.policy.heading = None
+        

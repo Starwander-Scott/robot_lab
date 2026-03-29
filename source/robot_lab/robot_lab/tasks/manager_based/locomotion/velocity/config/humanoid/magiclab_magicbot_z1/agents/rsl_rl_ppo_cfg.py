@@ -9,8 +9,8 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class MagicLabBotZ1RoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 3000
-    save_interval = 50
+    max_iterations = 5000
+    save_interval = 100
     experiment_name = "magiclab_bot_z1_rough"
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,
@@ -41,5 +41,5 @@ class MagicLabBotZ1FlatPPORunnerCfg(MagicLabBotZ1RoughPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 1500
+        self.max_iterations = 6000
         self.experiment_name = "magiclab_bot_z1_flat"
