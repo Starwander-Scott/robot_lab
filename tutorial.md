@@ -194,4 +194,111 @@ parser.add_argument("--cmd-vx", type=float, default=0.0, help="Commanded forward
 
 完成一次出色的 Sim2Sim，就像给不同位面的大跨度物理引擎移植同一套灵魂。不仅要想尽办法**格式化感官数据 (Obs Configuration)**，同步**时间的流动速度 (Control DT)**，最容易忽视但也最致命的一环是**匹配出生点 (Initialization Qpos)** 避免力学爆炸崩溃。
 
-只要掌握了以上 6 步底层原理与代码逻辑，未来你就可以尝试部署拥有几百维数据（包括激光雷达深度测量 Height Scan 和摄像头）的前沿强化学习模型了！
+只要掌握了以上 6 步底层原理与代码逻辑，未来你就可以尝试部署拥有几百维数据（包括激光雷达深度测量 Height Scan 和摄像头）的前沿强化学习模型了！激光雷达深度测量 Height Scan 和摄像头）的前沿强化学习模型了！
+
+## 第七步：多地形障碍测试
+
+我们尝试去创建一个全新的 `scene_obstacles.xml` 测试场地，然后我们运行以下命令去看一看go2在面对全新的环境时的表现吧！
+
+```bash
+/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py \
+  --mjcf assets/go2/scene_obstacles.xml \
+  --policy logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt \
+  --duration 2000 \
+  --control-mode pd \
+  --cmd-vx 0.6 \
+  --render
+ ```
+
+发现 go2 在平地直行时有一点点向右边拐弯？这就是因为强化学习特有的步态歧义，我们在快速部署时可以：
+```bash
+ # 加入微小的转向角速度进行人工补偿（如果向右拐，就给正的左偏转，视情况调正负）
+/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py --mjcf assets/go2/scene_obstacles.xml --policy logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt --duration 2000 --control-mode pd --cmd-vx 0.8 --cmd-wz 0.05 --render
+```
+
+---
+
+## 📦 第八步：环境依赖搭建与系统选型 (Dependencies)
+
+这个项目（Sim2Sim 侧）的设计核心是**轻量与解耦**，你不需要在测试平台上安装笨重的 IsaacLab。只需极简的系统依赖，即可完美跑通所有物理模拟和模型推理逻辑。
+
+### 核心库说明：
+1. **`mujoco`** (>= 3.0.0): 提供最高效的高精度物理引擎前端和 `mujoco.viewer` 的渲染可视化。
+2. **`torch`**: 运行导出的 `.pt` 策略模型的必需库，此处仅使用纯 CPU 推理，可不装 CUDA 庞大依赖。
+3. **`numpy`**: 承担 MuJoCo 传感器数据矩阵运算操作。
+
+### 搭建方案：
+
+#### [方案一：极度轻量且无需额外首选项的 .venv (推荐🌟)]
+
+Python 自带的虚拟环境，无需安装数百 MB 的 conda。在边缘设备（树莓派、Jetson等）部署时这也是最不容易出系统包冲突的方法。
+
+```bash
+# 推荐使用虚拟环境进行隔离
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 安装核心依赖
+pip install torch numpy mujoco 
+```
+
+#### [方案二：统一管理的 Conda 虚拟环境]
+
+如果你系统中已经部署了 Anaconda / Miniconda 并且习惯用它：
+
+```bash
+# 1. 专门创建一个叫 go2-sim2sim 的 conda 环境，推荐 Python 3.10
+conda create -n go2-sim2sim python=3.10 -y
+
+# 2. 激活该虚拟环境
+conda activate go2-sim2sim
+
+# 3. 激活环境后，统一使用 pip 安装这三个依赖即可
+pip install torch numpy mujoco 
+```
+
+---
+
+## 第九步: 🎮 添加了键盘操控的功能
+
+通过监听 MuJoCo Viewer 传来的键位回调，我们可以在里面像开遥控车一样实时测试这只狗的模型：
+
+```bash
+/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy_keyboard.py \
+  --mjcf assets/go2/scene_obstacles.xml \
+  --policy logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt \
+  --duration 10000 \
+  --control-mode pd \
+  --render
+```
+
+**操作说明：**
+* **`↑ [向上箭头]`** ：前进加减速
+* **`↓ [向下箭头]`** ：后退加减速
+* **`← [向左箭头]`** ：向左平移
+* **`→ [向右箭头]`** ：向右平移
+* **`Q` / `E`** ：原地转向
+* **`Space`** ：急停复位
+
+## 🚀 模型测试命令汇总表
+
+以下是不同训练阶段/地形策略的 MuJoCo `sim2sim` 验证命令汇总：
+
+| 训练版本 | 策略路径 (.pt) | 测试场景 | 操作类型 | 验证命令 (请在 robot_lab 目录下运行) |
+| :--- | :--- | :--- | :--- | :--- |
+| **03-30 平地跑** | `logs/rsl_rl/unitree_go2_flat/2026-03-30_17-27-04/policy_mujoco.pt` | `scene.xml` | 直行 (vx=0.5) | `/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py --mjcf assets/go2/scene.xml --policy logs/rsl_rl/unitree_go2_flat/2026-03-30_17-27-04/policy_mujoco.pt --duration 2000 --control-mode pd --cmd-vx 0.5 --render` |
+| **03-30 平地跑** | (同上) | `scene_obstacles.xml` | 键盘控制 | `/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy_keyboard.py --mjcf assets/go2/scene_obstacles.xml --policy logs/rsl_rl/unitree_go2_flat/2026-03-30_17-27-04/policy_mujoco.pt --duration 2000 --control-mode pd --render` |
+| **03-29 复杂地形** | `logs/rsl_rl/unitree_go2_rough/2026-03-29_22-13-29/policy_mujoco_18900.pt` | `scene.xml` | 直行 (vx=0.5) | `/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py --mjcf assets/go2/scene.xml --policy logs/rsl_rl/unitree_go2_rough/2026-03-29_22-13-29/policy_mujoco_18900.pt --duration 2000 --control-mode pd --cmd-vx 0.5 --render` |
+| **03-29 复杂地形** | (同上) | `scene_obstacles.xml` | 键盘控制 | `/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy_keyboard.py --mjcf assets/go2/scene_obstacles.xml --policy logs/rsl_rl/unitree_go2_rough/2026-03-29_22-13-29/policy_mujoco_18900.pt --duration 2000 --control-mode pd --render` |
+| **03-28 复杂地形** | `logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt` | `scene.xml` | 直行 (vx=0.5) | `/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py --mjcf assets/go2/scene.xml --policy logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt --duration 2000 --control-mode pd --cmd-vx 0.5 --render` |
+| **03-28 复杂地形** | (同上) | `scene_obstacles.xml` | 键盘控制 | `/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy_keyboard.py --mjcf assets/go2/scene_obstacles.xml --policy logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt --duration 2000 --control-mode pd --render` |
+
+
+
+学长说这个训练曲线还没有完全收敛，可以再训一训
+
+然后目前无论是平地跑还是在复杂地形跑都有一点问题
+
+
+
+

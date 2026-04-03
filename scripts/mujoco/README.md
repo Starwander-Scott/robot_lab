@@ -6,6 +6,8 @@
 
 - 导出脚本：scripts/mujoco/export_go2_jit.py
 - 验证脚本：scripts/mujoco/verify_go2_policy.py
+- 手柄验证说明：scripts/mujoco/gamepad_control.md
+- 手柄验证脚本：scripts/mujoco/verify_go2_policy_gamepad.py
 - Go2 模型（推荐）：assets/go2/scene.xml
 - Go2 资产目录：assets/go2/assets/
 
@@ -19,10 +21,12 @@
 
 - torch
 - mujoco
+- pygame（手柄控制时需要）
 
 如需安装：
 
 - /home/oepr/robot_lab/.venv/bin/python -m pip install torch mujoco
+- /home/oepr/robot_lab/.venv/bin/python -m pip install pygame
 
 > 注意：本项目不再依赖 rsl_rl 来导出 TorchScript。
 
@@ -67,6 +71,12 @@
     --duration 20 \
     --control-mode pd \
     --render
+
+## 4.1 使用手柄控制
+
+独立说明见：
+
+- `scripts/mujoco/gamepad_control.md`
 
 ## 5. 常见问题
 

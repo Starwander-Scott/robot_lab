@@ -264,8 +264,8 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
-            "static_friction_range": (0.3, 1.0),
-            "dynamic_friction_range": (0.3, 0.8),
+            "static_friction_range": (0.1, 1.0),
+            "dynamic_friction_range": (0.1, 0.8),  # 先尝试调低下限，防止机械狗打滑，原来打下限：0.3
             "restitution_range": (0.0, 0.5),
             "num_buckets": 64,
         },
