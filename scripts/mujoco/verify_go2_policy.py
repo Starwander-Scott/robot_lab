@@ -57,6 +57,14 @@ class ControlConfig:
     kd: float = 0.5
 
 
+@dataclass
+class SpawnConfig:
+    x: float
+    y: float
+    z: float
+    yaw_deg: float = 0.0
+
+
 def _build_joint_indices(model: Any, joint_names: list[str]):
     joint_ids = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name) for name in joint_names]  # type: ignore[attr-defined]
     if any(jid < 0 for jid in joint_ids):
@@ -192,6 +200,27 @@ def _load_policy(policy_path: str, device: str) -> torch.jit.ScriptModule:
     return policy
 
 
+def _infer_spawn_config(mjcf_path: str) -> SpawnConfig:
+    """Pick a practical spawn point for scenes with enclosed layouts."""
+    scene_name = os.path.basename(mjcf_path)
+    if scene_name in {"scene_home.xml", "scene_home_300.xml", "scene_home_300_nav.xml"}:
+        # Open wood-floor patch in the living room, intentionally off the rug.
+        return SpawnConfig(x=6.2, y=1.0, z=0.45, yaw_deg=0.0)
+    return SpawnConfig(x=0.0, y=0.0, z=0.45, yaw_deg=0.0)
+
+
+def _apply_spawn_pose(data: Any, spawn_cfg: SpawnConfig) -> None:
+    yaw = math.radians(spawn_cfg.yaw_deg)
+    data.qpos[0] = spawn_cfg.x
+    data.qpos[1] = spawn_cfg.y
+    data.qpos[2] = spawn_cfg.z
+    data.qpos[3] = math.cos(yaw / 2.0)
+    data.qpos[4] = 0.0
+    data.qpos[5] = 0.0
+    data.qpos[6] = math.sin(yaw / 2.0)
+    data.qvel[:6] = 0.0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Verify Go2 RSL-RL policy in MuJoCo")
     parser.add_argument("--mjcf", type=str, required=True, help="Path to Go2 MJCF model (xml)")
@@ -206,6 +235,10 @@ def main() -> None:
     parser.add_argument("--control-mode", choices=["pd", "pos"], default="pd")
     parser.add_argument("--kp", type=float, default=25.0, help="PD stiffness (only for pd)")
     parser.add_argument("--kd", type=float, default=0.5, help="PD damping (only for pd)")
+    parser.add_argument("--spawn-x", type=float, default=None, help="Override base spawn x in world frame")
+    parser.add_argument("--spawn-y", type=float, default=None, help="Override base spawn y in world frame")
+    parser.add_argument("--spawn-z", type=float, default=None, help="Override base spawn z in world frame")
+    parser.add_argument("--spawn-yaw-deg", type=float, default=None, help="Override base spawn yaw in degrees")
     parser.add_argument("--render", action="store_true", help="Enable MuJoCo viewer")
     parser.add_argument("--base-body", type=str, default="base_link", help="Base body name in MJCF")
     args = parser.parse_args()
@@ -227,6 +260,18 @@ def main() -> None:
 
     _, qpos_adr, dof_adr = _build_joint_indices(model, GO2_JOINT_NAMES)
     default_qpos = _get_default_qpos(model, qpos_adr, GO2_JOINT_NAMES)
+
+    spawn_cfg = _infer_spawn_config(mjcf_path)
+    if args.spawn_x is not None:
+        spawn_cfg.x = args.spawn_x
+    if args.spawn_y is not None:
+        spawn_cfg.y = args.spawn_y
+    if args.spawn_z is not None:
+        spawn_cfg.z = args.spawn_z
+    if args.spawn_yaw_deg is not None:
+        spawn_cfg.yaw_deg = args.spawn_yaw_deg
+
+    _apply_spawn_pose(data, spawn_cfg)
 
     # Initialize MuJoCo qpos to the default qpos to avoid huge PD impulses
     for i, adr in enumerate(qpos_adr):

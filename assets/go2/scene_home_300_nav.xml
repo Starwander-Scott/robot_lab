@@ -1,0 +1,63 @@
+<mujoco model="go2 home environment 300sqm navigation">
+  <include file="scene_home_300.xml"/>
+
+  <worldbody>
+    <!-- ================================================================ -->
+    <!--  Navigation-oriented add-ons                                     -->
+    <!--  Keep obstacles low-speed traversable but force route changes     -->
+    <!-- ================================================================ -->
+
+    <!-- living room clutter -->
+    <geom pos="4.6 2.2 0.18" type="box" size="0.32 0.24 0.18" euler="0 0 22" rgba="0.78 0.60 0.26 1"/>
+    <geom pos="6.0 3.8 0.16" type="box" size="0.20 0.20 0.16" rgba="0.22 0.38 0.60 1"/>
+    <geom pos="8.6 2.2 0.28" type="cylinder" size="0.22 0.28" rgba="0.22 0.22 0.24 1"/>
+
+    <!-- dining pinch point -->
+    <geom pos="7.8 5.55 0.30" type="box" size="0.16 0.16 0.30" rgba="0.32 0.20 0.12 1"/>
+    <geom pos="8.9 5.45 0.30" type="box" size="0.16 0.16 0.30" rgba="0.32 0.20 0.12 1"/>
+
+    <!-- kitchen route shaping -->
+    <geom pos="12.9 4.2 0.22" type="box" size="0.24 0.18 0.22" euler="0 0 -18" rgba="0.65 0.52 0.34 1"/>
+    <geom pos="15.0 3.7 0.40" type="cylinder" size="0.16 0.40" rgba="0.68 0.68 0.70 1"/>
+    <geom pos="11.0 2.4 0.20" type="box" size="0.22 0.14 0.20" rgba="0.25 0.25 0.28 1"/>
+
+    <!-- utility room congestion -->
+    <geom pos="18.7 2.4 0.32" type="box" size="0.30 0.24 0.32" euler="0 0 12" rgba="0.52 0.42 0.30 1"/>
+    <geom pos="20.3 4.4 0.24" type="box" size="0.25 0.20 0.24" rgba="0.50 0.46 0.42 1"/>
+    <geom pos="17.9 5.0 0.30" type="cylinder" size="0.18 0.30" rgba="0.15 0.15 0.18 1"/>
+
+    <!-- long hallway slalom -->
+    <geom pos="6.2 6.55 0.34" type="box" size="0.22 0.20 0.34" rgba="0.75 0.66 0.24 1"/>
+    <geom pos="8.8 7.45 0.34" type="box" size="0.22 0.20 0.34" rgba="0.75 0.66 0.24 1"/>
+    <geom pos="11.4 6.60 0.34" type="box" size="0.22 0.20 0.34" rgba="0.75 0.66 0.24 1"/>
+    <geom pos="14.0 7.40 0.34" type="box" size="0.22 0.20 0.34" rgba="0.75 0.66 0.24 1"/>
+    <geom pos="16.6 6.55 0.34" type="box" size="0.22 0.20 0.34" rgba="0.75 0.66 0.24 1"/>
+
+    <!-- hallway partial narrowing near east side -->
+    <!-- Keep the visual cue, but leave more practical clearance for Go2 -->
+    <geom pos="19.1 6.35 0.45" type="box" size="0.40 0.08 0.45" rgba="0.30 0.48 0.30 1"/>
+    <geom pos="20.5 7.65 0.45" type="box" size="0.40 0.08 0.45" rgba="0.30 0.48 0.30 1"/>
+
+    <!-- master bedroom navigation clutter -->
+    <geom pos="3.0 10.0 0.18" type="box" size="0.28 0.18 0.18" euler="0 0 -20" rgba="0.74 0.54 0.26 1"/>
+    <geom pos="6.7 10.4 0.22" type="cylinder" size="0.18 0.22" rgba="0.52 0.34 0.24 1"/>
+    <geom pos="7.6 12.3 0.16" type="box" size="0.18 0.18 0.16" rgba="0.30 0.30 0.34 1"/>
+
+    <!-- bathroom doorway precision obstacle -->
+    <geom pos="10.9 9.05 0.07" type="capsule" size="0.05 0.34" euler="0 0 90" rgba="0.85 0.85 0.88 1"/>
+
+    <!-- study / bedroom route shaping -->
+    <geom pos="15.8 11.4 0.24" type="box" size="0.26 0.18 0.24" rgba="0.58 0.46 0.26 1"/>
+    <geom pos="18.3 12.1 0.32" type="box" size="0.35 0.22 0.32" euler="0 0 15" rgba="0.24 0.28 0.54 1"/>
+    <geom pos="19.1 10.3 0.28" type="cylinder" size="0.20 0.28" rgba="0.22 0.22 0.22 1"/>
+
+    <!-- low traversability checks near thresholds -->
+    <geom pos="4.4 5.75 0.03" type="box" size="0.18 0.10 0.03" rgba="0.18 0.18 0.20 1"/>
+    <geom pos="12.4 5.75 0.03" type="box" size="0.18 0.10 0.03" rgba="0.18 0.18 0.20 1"/>
+    <geom pos="19.4 5.75 0.03" type="box" size="0.18 0.10 0.03" rgba="0.18 0.18 0.20 1"/>
+    <geom pos="10.25 3.4 0.03" type="box" size="0.10 0.18 0.03" rgba="0.18 0.18 0.20 1"/>
+    <geom pos="17.25 3.4 0.03" type="box" size="0.10 0.18 0.03" rgba="0.18 0.18 0.20 1"/>
+    <geom pos="8.75 10.4 0.03" type="box" size="0.10 0.18 0.03" rgba="0.18 0.18 0.20 1"/>
+    <geom pos="13.25 10.4 0.03" type="box" size="0.10 0.18 0.03" rgba="0.18 0.18 0.20 1"/>
+  </worldbody>
+</mujoco>

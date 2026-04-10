@@ -1,0 +1,402 @@
+<mujoco model="go2 home environment">
+  <include file="go2.xml"/>
+
+  <statistic center="10 7 0.5" extent="12"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="-130" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.8 0.85 0.9" rgb2="0.5 0.6 0.7" width="512" height="3072"/>
+
+    <!-- floor textures -->
+    <texture type="2d" name="tile_tex" builtin="checker" mark="edge"
+      rgb1="0.85 0.82 0.78" rgb2="0.75 0.72 0.68" markrgb="0.9 0.88 0.85" width="300" height="300"/>
+    <material name="tile" texture="tile_tex" texuniform="true" texrepeat="12 12" reflectance="0.3"/>
+
+    <texture type="2d" name="wood_floor_tex" builtin="checker"
+      rgb1="0.65 0.45 0.25" rgb2="0.55 0.38 0.20" width="200" height="200"/>
+    <material name="wood_floor" texture="wood_floor_tex" texuniform="true" texrepeat="15 15" reflectance="0.15"/>
+
+    <texture type="2d" name="carpet_tex" builtin="flat"
+      rgb1="0.4 0.25 0.25" rgb2="0.35 0.2 0.2" width="128" height="128"/>
+    <material name="carpet" texture="carpet_tex" texuniform="true" reflectance="0.05"/>
+
+    <texture type="2d" name="carpet_blue_tex" builtin="flat"
+      rgb1="0.2 0.25 0.4" rgb2="0.18 0.22 0.35" width="128" height="128"/>
+    <material name="carpet_blue" texture="carpet_blue_tex" texuniform="true" reflectance="0.05"/>
+
+    <texture type="2d" name="marble_tex" builtin="checker" mark="cross"
+      rgb1="0.9 0.88 0.85" rgb2="0.82 0.80 0.77" markrgb="0.85 0.83 0.8" width="300" height="300"/>
+    <material name="marble" texture="marble_tex" texuniform="true" texrepeat="6 6" reflectance="0.5"/>
+
+    <!-- furniture & wall materials -->
+    <texture type="cube" name="wall_tex" builtin="flat" rgb1="0.92 0.90 0.85" rgb2="0.92 0.90 0.85" width="128" height="128"/>
+    <material name="wall" texture="wall_tex"/>
+    <texture type="cube" name="wood_tex" builtin="flat" rgb1="0.55 0.35 0.18" rgb2="0.5 0.3 0.15" width="128" height="128"/>
+    <material name="wood" texture="wood_tex"/>
+    <texture type="cube" name="dark_wood_tex" builtin="flat" rgb1="0.35 0.2 0.1" rgb2="0.3 0.18 0.08" width="128" height="128"/>
+    <material name="dark_wood" texture="dark_wood_tex"/>
+    <texture type="cube" name="sofa_tex" builtin="flat" rgb1="0.35 0.45 0.55" rgb2="0.3 0.4 0.5" width="128" height="128"/>
+    <material name="sofa" texture="sofa_tex"/>
+    <texture type="cube" name="sofa_brown_tex" builtin="flat" rgb1="0.5 0.3 0.15" rgb2="0.45 0.27 0.12" width="128" height="128"/>
+    <material name="sofa_brown" texture="sofa_brown_tex"/>
+    <texture type="cube" name="chrome_tex" builtin="flat" rgb1="0.7 0.7 0.72" rgb2="0.65 0.65 0.67" width="128" height="128"/>
+    <material name="chrome" texture="chrome_tex" reflectance="0.4"/>
+    <texture type="cube" name="cabinet_tex" builtin="flat" rgb1="0.9 0.88 0.85" rgb2="0.85 0.83 0.8" width="128" height="128"/>
+    <material name="cabinet" texture="cabinet_tex"/>
+    <texture type="cube" name="counter_tex" builtin="flat" rgb1="0.3 0.3 0.3" rgb2="0.25 0.25 0.25" width="128" height="128"/>
+    <material name="counter" texture="counter_tex" reflectance="0.3"/>
+  </asset>
+
+  <!-- ================================================================== -->
+  <!--  LAYOUT: 20m x 14m = 280 sqm                                      -->
+  <!--                                                                    -->
+  <!--  Y=14 +-----+----------+----+--------+                            -->
+  <!--       |Master Bedroom  |Bath| Bed 2 / Study                       -->
+  <!--       | (8x6=48sqm)   |(4x6)| (8x6=48sqm)                        -->
+  <!--  Y=8  +--door----------+door+--door--+                            -->
+  <!--       |       Central Hallway (20x2=40sqm)                         -->
+  <!--  Y=6  +---door----+--door---+--door--+                            -->
+  <!--       | Living Rm  | Kitchen | Utility|                            -->
+  <!--       | + Dining   | +Dining |+Garage |                            -->
+  <!--       | (10x6=60)  | (6x6=36)|(4x6=24)|                           -->
+  <!--  Y=0  +------------+---------+--------+                            -->
+  <!--      X=0          X=10     X=16     X=20                           -->
+  <!-- ================================================================== -->
+
+  <worldbody>
+    <!-- multiple lights for large space -->
+    <light pos="5 3 2.4" dir="0 0 -1" directional="true"/>
+    <light pos="13 3 2.4" dir="0 0 -1" diffuse="0.5 0.5 0.5" specular="0.1 0.1 0.1"/>
+    <light pos="5 11 2.4" dir="0 0 -1" diffuse="0.5 0.5 0.5" specular="0.1 0.1 0.1"/>
+    <light pos="15 11 2.4" dir="0 0 -1" diffuse="0.5 0.5 0.5" specular="0.1 0.1 0.1"/>
+
+    <!-- ============================================================ -->
+    <!--  GROUND PLANE                                                -->
+    <!-- ============================================================ -->
+    <geom name="floor" size="0 0 0.01" type="plane" material="tile"/>
+
+    <!-- ============================================================ -->
+    <!--  OUTER WALLS: 20m x 14m, thickness=0.1m, height=2.5m        -->
+    <!-- ============================================================ -->
+    <!-- south wall (Y=0): split for front door at X=4~5.2 -->
+    <geom pos="2.0  -0.05 1.25" type="box" size="2.0  0.05 1.25" material="wall"/>
+    <geom pos="12.6 -0.05 1.25" type="box" size="7.4  0.05 1.25" material="wall"/>
+    <!-- north wall (Y=14) -->
+    <geom pos="10.0 14.05 1.25" type="box" size="10.0 0.05 1.25" material="wall"/>
+    <!-- west wall (X=0) -->
+    <geom pos="-0.05 7.0 1.25" type="box" size="0.05 7.0 1.25" material="wall"/>
+    <!-- east wall (X=20) -->
+    <geom pos="20.05 7.0 1.25" type="box" size="0.05 7.0 1.25" material="wall"/>
+
+    <!-- ============================================================ -->
+    <!--  HALLWAY WALLS (Y=6 and Y=8)                                 -->
+    <!--  Central hallway runs full width: X=0~20, Y=6~8              -->
+    <!-- ============================================================ -->
+    <!-- south hallway wall (Y=6): doors at X=4~5.2, X=12~13.2, X=17~18.2 -->
+    <geom pos="2.0   6.0 1.25" type="box" size="2.0   0.05 1.25" material="wall"/>
+    <geom pos="8.6   6.0 1.25" type="box" size="3.4   0.05 1.25" material="wall"/>
+    <geom pos="15.1  6.0 1.25" type="box" size="1.9   0.05 1.25" material="wall"/>
+    <geom pos="19.1  6.0 1.25" type="box" size="0.9   0.05 1.25" material="wall"/>
+
+    <!-- north hallway wall (Y=8): doors at X=3~4.2, X=9~10.2, X=15~16.2 -->
+    <geom pos="1.5   8.0 1.25" type="box" size="1.5   0.05 1.25" material="wall"/>
+    <geom pos="6.6   8.0 1.25" type="box" size="2.4   0.05 1.25" material="wall"/>
+    <geom pos="12.6  8.0 1.25" type="box" size="2.4   0.05 1.25" material="wall"/>
+    <geom pos="18.1  8.0 1.25" type="box" size="1.9   0.05 1.25" material="wall"/>
+
+    <!-- ============================================================ -->
+    <!--  INTERIOR N-S WALLS (south rooms)                            -->
+    <!-- ============================================================ -->
+    <!-- X=10 wall: living room | kitchen, door at Y=3~4.2 -->
+    <geom pos="10.0 1.5  1.25" type="box" size="0.05 1.5  1.25" material="wall"/>
+    <geom pos="10.0 5.1  1.25" type="box" size="0.05 0.9  1.25" material="wall"/>
+
+    <!-- X=16 wall: kitchen | utility, door at Y=3~4.2 -->
+    <geom pos="16.0 1.5  1.25" type="box" size="0.05 1.5  1.25" material="wall"/>
+    <geom pos="16.0 5.1  1.25" type="box" size="0.05 0.9  1.25" material="wall"/>
+
+    <!-- ============================================================ -->
+    <!--  INTERIOR N-S WALLS (north rooms)                            -->
+    <!-- ============================================================ -->
+    <!-- X=8 wall: master bedroom | bathroom, door at Y=10~11.2 -->
+    <geom pos="8.0  9.0  1.25" type="box" size="0.05 1.0  1.25" material="wall"/>
+    <geom pos="8.0  12.6 1.25" type="box" size="0.05 1.4  1.25" material="wall"/>
+
+    <!-- X=12 wall: bathroom | bedroom 2, door at Y=10~11.2 -->
+    <geom pos="12.0 9.0  1.25" type="box" size="0.05 1.0  1.25" material="wall"/>
+    <geom pos="12.0 12.6 1.25" type="box" size="0.05 1.4  1.25" material="wall"/>
+
+    <!-- ============================================================ -->
+    <!--  DOOR THRESHOLDS (1.5cm raised strips)                       -->
+    <!-- ============================================================ -->
+    <!-- front door threshold -->
+    <geom pos="4.6  0.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <!-- hallway south doors -->
+    <geom pos="4.6  6.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="12.6 6.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="17.6 6.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <!-- hallway north doors -->
+    <geom pos="3.6  8.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="9.6  8.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="15.6 8.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <!-- interior room doors -->
+    <geom pos="10.0 3.6  0.008" type="box" size="0.06 0.6 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="16.0 3.6  0.008" type="box" size="0.06 0.6 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="8.0  10.6 0.008" type="box" size="0.06 0.6 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="12.0 10.6 0.008" type="box" size="0.06 0.6 0.008" rgba="0.5 0.4 0.3 1"/>
+
+    <!-- ============================================================ -->
+    <!--  ROOM 1: LIVING ROOM + DINING (X=0~10, Y=0~6, 60sqm)        -->
+    <!--  wood floor + large carpet                                   -->
+    <!-- ============================================================ -->
+    <geom pos="5.0 3.0 0.005" type="box" size="5.0 3.0 0.005" material="wood_floor" contype="0" conaffinity="0"/>
+
+    <!-- large area rug -->
+    <geom pos="3.5 3.0 0.012" type="box" size="2.5 1.8 0.007"
+      material="carpet" friction="1.5 0.05 0.01" contype="0" conaffinity="0"/>
+
+    <!-- -- L-shaped sofa -- -->
+    <!-- main seat (along west wall) -->
+    <geom pos="0.5 3.0 0.2" type="box" size="0.45 1.5 0.2" material="sofa"/>
+    <geom pos="0.08 3.0 0.45" type="box" size="0.06 1.5 0.25" material="sofa"/>
+    <!-- extension -->
+    <geom pos="1.5 1.55 0.2" type="box" size="1.0 0.40 0.2" material="sofa"/>
+    <geom pos="1.5 1.18 0.45" type="box" size="1.0 0.06 0.25" material="sofa"/>
+    <!-- armrests -->
+    <geom pos="0.5 4.48 0.35" type="box" size="0.40 0.06 0.10" material="sofa"/>
+    <geom pos="2.48 1.55 0.35" type="box" size="0.06 0.35 0.10" material="sofa"/>
+
+    <!-- -- large coffee table -- -->
+    <geom pos="3.0 3.0 0.38" type="box" size="0.6 0.35 0.018" material="wood"/>
+    <geom pos="2.45 2.70 0.18" type="cylinder" size="0.025 0.18" material="chrome"/>
+    <geom pos="3.55 2.70 0.18" type="cylinder" size="0.025 0.18" material="chrome"/>
+    <geom pos="2.45 3.30 0.18" type="cylinder" size="0.025 0.18" material="chrome"/>
+    <geom pos="3.55 3.30 0.18" type="cylinder" size="0.025 0.18" material="chrome"/>
+
+    <!-- -- TV wall unit (against east interior wall) -- -->
+    <geom pos="9.3 3.0 0.25" type="box" size="0.5 1.2 0.25" material="dark_wood"/>
+    <geom pos="9.5 3.0 0.7" type="box" size="0.02 0.8 0.35" rgba="0.1 0.1 0.1 1"/>
+
+    <!-- -- bookshelf (along south wall) -- -->
+    <geom pos="7.0 0.25 0.6" type="box" size="1.5 0.20 0.6" material="wood"/>
+
+    <!-- -- floor lamp -->
+    <geom pos="0.3 4.8 0.7" type="cylinder" size="0.03 0.7" material="chrome"/>
+    <geom pos="0.3 4.8 1.45" type="sphere" size="0.12" rgba="0.95 0.9 0.8 0.6"/>
+
+    <!-- -- dining area (near kitchen door) -- -->
+    <!-- dining table -->
+    <geom pos="7.5 4.5 0.72" type="box" size="0.75 0.5 0.02" material="wood"/>
+    <geom pos="6.80 4.05 0.35" type="box" size="0.04 0.04 0.35" material="wood"/>
+    <geom pos="8.20 4.05 0.35" type="box" size="0.04 0.04 0.35" material="wood"/>
+    <geom pos="6.80 4.95 0.35" type="box" size="0.04 0.04 0.35" material="wood"/>
+    <geom pos="8.20 4.95 0.35" type="box" size="0.04 0.04 0.35" material="wood"/>
+    <!-- chairs (6) -->
+    <geom pos="6.80 4.5 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="6.56 4.5 0.55" type="box" size="0.02 0.20 0.30" material="wood"/>
+    <geom pos="8.20 4.5 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="8.44 4.5 0.55" type="box" size="0.02 0.20 0.30" material="wood"/>
+    <geom pos="7.2 4.05 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="7.8 4.05 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="7.2 4.95 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="7.8 4.95 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+
+    <!-- -- entrance foyer area (near front door) -- -->
+    <geom pos="4.6 0.25 0.5" type="box" size="0.6 0.20 0.5" material="wood"/>
+    <!-- shoe rack -->
+    <geom pos="3.5 0.2 0.15" type="box" size="0.5 0.15 0.15" material="wood"/>
+    <!-- shoes on floor -->
+    <geom pos="3.8 0.5 0.03" type="box" size="0.08 0.04 0.03" euler="0 0 15" rgba="0.3 0.2 0.15 1"/>
+    <geom pos="4.0 0.55 0.03" type="box" size="0.09 0.04 0.03" euler="0 0 -10" rgba="0.2 0.2 0.25 1"/>
+    <!-- dog bowl -->
+    <geom pos="1.5 0.4 0.03" type="cylinder" size="0.12 0.03" rgba="0.7 0.2 0.2 1"/>
+    <!-- umbrella stand -->
+    <geom pos="5.5 0.2 0.3" type="cylinder" size="0.08 0.3" material="chrome"/>
+
+    <!-- ============================================================ -->
+    <!--  ROOM 2: KITCHEN + DINING (X=10~16, Y=0~6, 36sqm)           -->
+    <!--  tile floor (base material, no overlay needed)               -->
+    <!-- ============================================================ -->
+    <!-- L-shaped counter along east and north walls -->
+    <!-- east counter -->
+    <geom pos="15.5 2.5 0.42" type="box" size="0.45 2.5 0.42" material="cabinet"/>
+    <geom pos="15.5 2.5 0.85" type="box" size="0.50 2.55 0.01" material="counter"/>
+    <!-- north counter (along Y=6 wall) -->
+    <geom pos="12.5 5.5 0.42" type="box" size="2.5  0.45 0.42" material="cabinet"/>
+    <geom pos="12.5 5.5 0.85" type="box" size="2.55 0.50 0.01" material="counter"/>
+
+    <!-- kitchen island -->
+    <geom pos="13.0 2.5 0.42" type="box" size="0.7 0.5 0.42" material="cabinet"/>
+    <geom pos="13.0 2.5 0.85" type="box" size="0.75 0.55 0.01" material="counter"/>
+
+    <!-- bar stools (around island) -->
+    <geom pos="13.0 1.8 0.3" type="cylinder" size="0.15 0.02" material="chrome"/>
+    <geom pos="13.0 1.8 0.15" type="cylinder" size="0.025 0.15" material="chrome"/>
+    <geom pos="13.8 2.5 0.3" type="cylinder" size="0.15 0.02" material="chrome"/>
+    <geom pos="13.8 2.5 0.15" type="cylinder" size="0.025 0.15" material="chrome"/>
+
+    <!-- refrigerator -->
+    <geom pos="15.5 5.3 0.9" type="box" size="0.40 0.38 0.9" rgba="0.88 0.88 0.90 1"/>
+    <!-- oven -->
+    <geom pos="15.5 0.5 0.42" type="box" size="0.35 0.35 0.42" rgba="0.15 0.15 0.15 1"/>
+
+    <!-- ============================================================ -->
+    <!--  ROOM 3: UTILITY / GARAGE (X=16~20, Y=0~6, 24sqm)           -->
+    <!-- ============================================================ -->
+    <!-- washing machine -->
+    <geom pos="17.5 0.5 0.42" type="box" size="0.35 0.35 0.42" rgba="0.9 0.9 0.92 1"/>
+    <!-- dryer -->
+    <geom pos="18.5 0.5 0.42" type="box" size="0.35 0.35 0.42" rgba="0.9 0.9 0.92 1"/>
+    <!-- storage shelves -->
+    <geom pos="19.5 3.0 0.8" type="box" size="0.4 2.0 0.8" material="chrome"/>
+    <!-- workbench -->
+    <geom pos="18.0 5.5 0.4" type="box" size="1.5 0.4 0.4" material="wood"/>
+    <!-- random boxes on floor -->
+    <geom pos="17.0 3.5 0.15" type="box" size="0.2 0.2 0.15" rgba="0.6 0.5 0.3 1"/>
+    <geom pos="17.5 4.0 0.2" type="box" size="0.25 0.2 0.2" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="17.0 4.5 0.12" type="box" size="0.18 0.18 0.12" rgba="0.4 0.35 0.3 1"/>
+
+    <!-- ============================================================ -->
+    <!--  HALLWAY (X=0~20, Y=6~8, 40sqm)                             -->
+    <!--  marble floor + hall table + decorations                     -->
+    <!-- ============================================================ -->
+    <geom pos="10.0 7.0 0.006" type="box" size="10.0 1.0 0.006" material="marble" contype="0" conaffinity="0"/>
+
+    <!-- hall console table (against south wall) -->
+    <geom pos="7.0 6.2 0.35" type="box" size="0.8 0.15 0.015" material="dark_wood"/>
+    <geom pos="6.25 6.2 0.168" type="box" size="0.03 0.12 0.168" material="dark_wood"/>
+    <geom pos="7.75 6.2 0.168" type="box" size="0.03 0.12 0.168" material="dark_wood"/>
+
+    <!-- hall runner rug -->
+    <geom pos="10.0 7.0 0.013" type="box" size="8.0 0.4 0.007"
+      material="carpet" friction="1.2 0.05 0.01" contype="0" conaffinity="0"/>
+
+    <!-- plant pot -->
+    <geom pos="0.4 7.0 0.25" type="cylinder" size="0.15 0.25" rgba="0.6 0.35 0.2 1"/>
+    <!-- another plant pot -->
+    <geom pos="19.5 7.0 0.25" type="cylinder" size="0.15 0.25" rgba="0.6 0.35 0.2 1"/>
+
+    <!-- ============================================================ -->
+    <!--  ROOM 4: MASTER BEDROOM (X=0~8, Y=8~14, 48sqm)              -->
+    <!--  wood floor + large rug                                      -->
+    <!-- ============================================================ -->
+    <geom pos="4.0 11.0 0.005" type="box" size="4.0 3.0 0.005" material="wood_floor" contype="0" conaffinity="0"/>
+
+    <!-- large bedroom rug -->
+    <geom pos="4.0 11.0 0.012" type="box" size="2.5 1.8 0.007"
+      material="carpet_blue" friction="1.5 0.05 0.01" contype="0" conaffinity="0"/>
+
+    <!-- king bed (head against north wall) -->
+    <geom pos="4.0 13.2 0.18" type="box" size="1.1 0.7 0.18" material="dark_wood"/>
+    <geom pos="4.0 13.0 0.40" type="box" size="1.05 0.9 0.06" rgba="0.92 0.90 0.88 1"/>
+    <!-- headboard -->
+    <geom pos="4.0 13.85 0.6" type="box" size="1.1 0.05 0.35" material="dark_wood"/>
+    <!-- pillows -->
+    <geom pos="3.5 13.5 0.48" type="box" size="0.3 0.2 0.06" rgba="0.95 0.95 0.97 1"/>
+    <geom pos="4.5 13.5 0.48" type="box" size="0.3 0.2 0.06" rgba="0.95 0.95 0.97 1"/>
+
+    <!-- nightstand left -->
+    <geom pos="2.5 13.5 0.28" type="box" size="0.25 0.25 0.28" material="dark_wood"/>
+    <!-- nightstand right -->
+    <geom pos="5.5 13.5 0.28" type="box" size="0.25 0.25 0.28" material="dark_wood"/>
+
+    <!-- wardrobe (along west wall) -->
+    <geom pos="0.35 11.0 1.0" type="box" size="0.30 1.5 1.0" material="dark_wood"/>
+
+    <!-- dresser / vanity -->
+    <geom pos="6.5 13.5 0.35" type="box" size="0.8 0.3 0.35" material="dark_wood"/>
+    <!-- mirror (on wall above dresser) -->
+    <geom pos="6.5 13.85 0.9" type="box" size="0.5 0.01 0.35" rgba="0.7 0.75 0.8 0.8"/>
+
+    <!-- armchair -->
+    <geom pos="1.5 9.0 0.2" type="box" size="0.35 0.35 0.2" material="sofa_brown"/>
+    <geom pos="1.18 9.0 0.45" type="box" size="0.05 0.35 0.25" material="sofa_brown"/>
+
+    <!-- small table next to armchair -->
+    <geom pos="2.3 9.0 0.3" type="cylinder" size="0.2 0.015" material="wood"/>
+    <geom pos="2.3 9.0 0.143" type="cylinder" size="0.03 0.143" material="chrome"/>
+
+    <!-- ============================================================ -->
+    <!--  ROOM 5: BATHROOM (X=8~12, Y=8~14, 24sqm)                   -->
+    <!--  marble floor                                                -->
+    <!-- ============================================================ -->
+    <geom pos="10.0 11.0 0.006" type="box" size="2.0 3.0 0.006" material="marble" contype="0" conaffinity="0"/>
+
+    <!-- bathtub (north corner) -->
+    <geom pos="10.0 13.2 0.3" type="box" size="0.4 0.7 0.3" rgba="0.95 0.95 0.97 1"/>
+
+    <!-- vanity/sink counter -->
+    <geom pos="8.5 11.0 0.4" type="box" size="0.4 0.6 0.4" material="cabinet"/>
+    <geom pos="8.5 11.0 0.81" type="box" size="0.45 0.65 0.01" material="counter"/>
+
+    <!-- toilet -->
+    <geom pos="11.5 9.5 0.2" type="box" size="0.2 0.3 0.2" rgba="0.95 0.95 0.97 1"/>
+
+    <!-- bathroom shelf -->
+    <geom pos="11.5 12.5 0.6" type="box" size="0.3 0.8 0.02" material="chrome"/>
+
+    <!-- ============================================================ -->
+    <!--  ROOM 6: BEDROOM 2 / STUDY (X=12~20, Y=8~14, 48sqm)        -->
+    <!--  carpet floor                                                -->
+    <!-- ============================================================ -->
+    <geom pos="16.0 11.0 0.01" type="box" size="4.0 3.0 0.01"
+      material="carpet_blue" friction="1.5 0.05 0.01" contype="0" conaffinity="0"/>
+
+    <!-- single bed (against east wall) -->
+    <geom pos="18.8 12.5 0.18" type="box" size="0.55 1.0 0.18" material="wood"/>
+    <geom pos="18.8 12.5 0.38" type="box" size="0.50 0.95 0.05" rgba="0.92 0.90 0.88 1"/>
+    <!-- headboard -->
+    <geom pos="18.8 13.45 0.55" type="box" size="0.55 0.05 0.30" material="wood"/>
+
+    <!-- nightstand -->
+    <geom pos="18.0 13.5 0.25" type="box" size="0.2 0.2 0.25" material="wood"/>
+
+    <!-- large desk (study area, near door) -->
+    <geom pos="14.0 9.5 0.72" type="box" size="0.8 0.4 0.02" material="wood"/>
+    <geom pos="13.25 9.5 0.35" type="box" size="0.04 0.35 0.35" material="wood"/>
+    <geom pos="14.75 9.5 0.35" type="box" size="0.04 0.35 0.35" material="wood"/>
+
+    <!-- desk chair -->
+    <geom pos="14.0 10.2 0.22" type="cylinder" size="0.2 0.02" rgba="0.2 0.2 0.2 1"/>
+    <geom pos="14.0 10.2 0.11" type="cylinder" size="0.03 0.11" material="chrome"/>
+
+    <!-- large bookshelf (along north wall) -->
+    <geom pos="16.0 13.7 0.9" type="box" size="2.5 0.25 0.9" material="wood"/>
+
+    <!-- wardrobe -->
+    <geom pos="12.5 12.0 0.9" type="box" size="0.4 1.0 0.9" material="wood"/>
+
+    <!-- bean bag -->
+    <geom pos="17.0 10.0 0.2" type="sphere" size="0.35" rgba="0.7 0.3 0.2 1"/>
+
+    <!-- ============================================================ -->
+    <!--  SCATTERED ITEMS (realism + obstacles for the robot)         -->
+    <!-- ============================================================ -->
+    <!-- yoga mat in hallway -->
+    <geom pos="15.0 7.0 0.006" type="box" size="0.9 0.3 0.004" rgba="0.3 0.6 0.5 0.9"/>
+
+    <!-- backpack on floor (living room) -->
+    <geom pos="5.5 2.0 0.15" type="box" size="0.15 0.1 0.15" euler="0 -15 20" rgba="0.2 0.3 0.5 1"/>
+
+    <!-- toy box (hallway) -->
+    <geom pos="5.0 7.5 0.1" type="box" size="0.2 0.15 0.1" rgba="0.8 0.6 0.1 1"/>
+
+    <!-- pet bed (living room corner) -->
+    <geom pos="0.5 5.3 0.05" type="cylinder" size="0.3 0.05" rgba="0.5 0.35 0.25 1"/>
+
+    <!-- laundry basket (bedroom) -->
+    <geom pos="7.0 9.5 0.2" type="cylinder" size="0.2 0.2" rgba="0.6 0.55 0.5 1"/>
+
+    <!-- stool (kitchen) -->
+    <geom pos="11.5 1.5 0.22" type="cylinder" size="0.15 0.02" material="wood"/>
+    <geom pos="11.5 1.5 0.1" type="cylinder" size="0.025 0.1" material="chrome"/>
+
+    <!-- water bowl (hallway for dog) -->
+    <geom pos="18.0 7.5 0.03" type="cylinder" size="0.1 0.03" rgba="0.3 0.5 0.7 1"/>
+  </worldbody>
+</mujoco>

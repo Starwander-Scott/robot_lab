@@ -302,3 +302,22 @@ pip install torch numpy mujoco
 
 
 
+## 4-03 日志
+
+`/home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-02_11-49-52/model_71000.pt`
+
+目前最好的平地模型，会在vy 0.5的时候左偏，但是总体表现非常优异
+
+`tensorboard --logdir=/home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-02_11-49-52`
+
+`/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py --mjcf assets/go2/scene.xml --policy /home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-03_12-26-48/exported/policy.pt --duration 2000 --control-mode pd --cmd-vx 0.5 --render `
+
+今天训的，效果不好，向前和向左都会偏，同时注意，可以直接play相应的pt，能够在export下自动生成mujoco版本的模型文件
+
+`python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Unitree-Go2-v0 --checkpoint /home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-03_12-26-48/model_42000.pt`
+
+
+
+
+
+

@@ -109,10 +109,10 @@ class CommandsCfg:
         rel_standing_envs=0.02,
         rel_heading_envs=1.0,
         heading_command=True,
-        heading_control_stiffness=1.0,    # amend 原来是0.5，增加对heading的控制
+        heading_control_stiffness=0.5,    # amend 原来是0.5，增加对heading的控制
         debug_vis=True,
         ranges=mdp.UniformThresholdVelocityCommandCfg.Ranges(
-            lin_vel_x=(-1.0, 1.0), lin_vel_y=(-1.0, 1.0), ang_vel_z=(-0.6, 0.6), heading=(-math.pi, math.pi)
+            lin_vel_x=(-1.0, 1.0), lin_vel_y=(-1.0, 1.0), ang_vel_z=(-1.0, 1.0), heading=(-math.pi, math.pi)
         ), # amend 原来ang_vel_z范围是(-1.0, 1.0)，调小范围，减少对agent的挑战
     )
 

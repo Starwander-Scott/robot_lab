@@ -57,6 +57,14 @@ class ControlConfig:
     kd: float = 0.5
 
 
+@dataclass
+class SpawnConfig:
+    x: float
+    y: float
+    z: float
+    yaw_deg: float = 0.0
+
+
 def _build_joint_indices(model: Any, joint_names: list[str]):
     joint_ids = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name) for name in joint_names]  # type: ignore[attr-defined]
     if any(jid < 0 for jid in joint_ids):
@@ -192,6 +200,63 @@ def _load_policy(policy_path: str, device: str) -> torch.jit.ScriptModule:
     return policy
 
 
+def _infer_spawn_config(mjcf_path: str) -> SpawnConfig:
+    scene_name = os.path.basename(mjcf_path)
+    if scene_name in {"scene_home.xml", "scene_home_300.xml", "scene_home_300_nav.xml"}:
+        # Open wood-floor patch in the living room, intentionally off the rug.
+        return SpawnConfig(x=6.2, y=1.0, z=0.45, yaw_deg=0.0)
+    return SpawnConfig(x=0.0, y=0.0, z=0.45, yaw_deg=0.0)
+
+
+def _apply_spawn_pose(data: Any, spawn_cfg: SpawnConfig) -> None:
+    yaw = math.radians(spawn_cfg.yaw_deg)
+    data.qpos[0] = spawn_cfg.x
+    data.qpos[1] = spawn_cfg.y
+    data.qpos[2] = spawn_cfg.z
+    data.qpos[3] = math.cos(yaw / 2.0)
+    data.qpos[4] = 0.0
+    data.qpos[5] = 0.0
+    data.qpos[6] = math.sin(yaw / 2.0)
+    data.qvel[:6] = 0.0
+
+
+def _respawn_robot(
+    data: Any,
+    home_qpos: np.ndarray,
+    home_qvel: np.ndarray,
+    last_action: np.ndarray,
+    cmd: np.ndarray,
+) -> None:
+    data.qpos[:] = home_qpos
+    data.qvel[:] = home_qvel
+    data.ctrl[:] = 0.0
+    if getattr(data, "act", None) is not None and data.act.size > 0:
+        data.act[:] = 0.0
+    if getattr(data, "qacc_warmstart", None) is not None and data.qacc_warmstart.size > 0:
+        data.qacc_warmstart[:] = 0.0
+    last_action[:] = 0.0
+    cmd[:] = 0.0
+
+
+def _lift_robot(
+    model: Any,
+    data: Any,
+    lift_height: float,
+    last_action: np.ndarray,
+    cmd: np.ndarray,
+) -> None:
+    data.qpos[2] += lift_height
+    data.qvel[:] = 0.0
+    data.ctrl[:] = 0.0
+    if getattr(data, "act", None) is not None and data.act.size > 0:
+        data.act[:] = 0.0
+    if getattr(data, "qacc_warmstart", None) is not None and data.qacc_warmstart.size > 0:
+        data.qacc_warmstart[:] = 0.0
+    last_action[:] = 0.0
+    cmd[:] = 0.0
+    mujoco.mj_forward(model, data)  # type: ignore[attr-defined]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Verify Go2 RSL-RL policy in MuJoCo")
     parser.add_argument("--mjcf", type=str, required=True, help="Path to Go2 MJCF model (xml)")
@@ -206,6 +271,10 @@ def main() -> None:
     parser.add_argument("--control-mode", choices=["pd", "pos"], default="pd")
     parser.add_argument("--kp", type=float, default=25.0, help="PD stiffness (only for pd)")
     parser.add_argument("--kd", type=float, default=0.5, help="PD damping (only for pd)")
+    parser.add_argument("--spawn-x", type=float, default=None, help="Override base spawn x in world frame")
+    parser.add_argument("--spawn-y", type=float, default=None, help="Override base spawn y in world frame")
+    parser.add_argument("--spawn-z", type=float, default=None, help="Override base spawn z in world frame")
+    parser.add_argument("--spawn-yaw-deg", type=float, default=None, help="Override base spawn yaw in degrees")
     parser.add_argument("--render", action="store_true", help="Enable MuJoCo viewer")
     parser.add_argument("--base-body", type=str, default="base_link", help="Base body name in MJCF")
     args = parser.parse_args()
@@ -228,9 +297,26 @@ def main() -> None:
     _, qpos_adr, dof_adr = _build_joint_indices(model, GO2_JOINT_NAMES)
     default_qpos = _get_default_qpos(model, qpos_adr, GO2_JOINT_NAMES)
 
+    spawn_cfg = _infer_spawn_config(mjcf_path)
+    if args.spawn_x is not None:
+        spawn_cfg.x = args.spawn_x
+    if args.spawn_y is not None:
+        spawn_cfg.y = args.spawn_y
+    if args.spawn_z is not None:
+        spawn_cfg.z = args.spawn_z
+    if args.spawn_yaw_deg is not None:
+        spawn_cfg.yaw_deg = args.spawn_yaw_deg
+
+    _apply_spawn_pose(data, spawn_cfg)
+
     # Initialize MuJoCo qpos to the default qpos to avoid huge PD impulses
     for i, adr in enumerate(qpos_adr):
         data.qpos[adr] = default_qpos[i]
+    data.qvel[:] = 0.0
+    mujoco.mj_forward(model, data)  # type: ignore[attr-defined]
+
+    home_qpos = data.qpos.copy()
+    home_qvel = data.qvel.copy()
 
     policy = _load_policy(policy_path, args.device)
 
@@ -239,10 +325,15 @@ def main() -> None:
 
     last_action = np.zeros(len(GO2_JOINT_NAMES), dtype=np.float32)
     cmd = np.array([args.cmd_vx, args.cmd_vy, args.cmd_wz], dtype=np.float32)
+    respawn_requested = False
+    lift_requested = False
+    last_respawn_time = -1.0
+    last_lift_time = -1.0
 
     # =============== KEYBOARD CALLBACK ===============
     def key_callback(keycode: int):
-        # GLFW keycodes: UP=265, DOWN=264, LEFT=263, RIGHT=262, Q=81, E=69, SPACE=32
+        nonlocal respawn_requested, last_respawn_time, lift_requested, last_lift_time
+        # GLFW keycodes: UP=265, DOWN=264, LEFT=263, RIGHT=262, Q=81, E=69, SPACE=32, 0=48, 9=57
         step_v = 0.2
         step_w = 0.2
         if keycode == 265:    # UP Arrow (Forward)
@@ -259,6 +350,20 @@ def main() -> None:
             cmd[2] -= step_w
         elif keycode == 32:   # Space
             cmd[:] = 0.0
+        elif keycode == 48:   # 0 (Respawn at spawn point)
+            now = time.monotonic()
+            if now - last_respawn_time < 0.5:
+                return
+            last_respawn_time = now
+            respawn_requested = True
+            return
+        elif keycode == 57:   # 9 (Lift robot upward by 0.1m)
+            now = time.monotonic()
+            if now - last_lift_time < 0.3:
+                return
+            last_lift_time = now
+            lift_requested = True
+            return
 
         # Optional clipping to prevent the values getting too huge
         cmd[0] = np.clip(cmd[0], -2.0, 2.0)
@@ -277,14 +382,34 @@ def main() -> None:
         print(" [LEFT / RIGHT] : Left / Right (Strafe)")
         print(" [Q / E]        : Turn Left / Turn Right")
         print(" [SPACE]        : Emergency Stop")
+        print(" [0]            : Respawn at spawn point")
+        print(" [9]            : Lift robot upward by 0.1m")
         print("====================================\n")
         viewer = mujoco.viewer.launch_passive(model, data, key_callback=key_callback)
+        viewer.opt.geomgroup[:] = 1
 
     try:
         step = 0
         while step < total_steps:
             if viewer is not None and not viewer.is_running():
                 break
+
+            if respawn_requested:
+                _respawn_robot(data, home_qpos, home_qvel, last_action, cmd)
+                mujoco.mj_forward(model, data)  # type: ignore[attr-defined]
+                respawn_requested = False
+                if viewer is not None:
+                    viewer.opt.geomgroup[:] = 1
+                print("\n[Respawn] Reset to spawn point.")
+                print(f"\r[Command] vx: {cmd[0]:.2f}, vy: {cmd[1]:.2f}, wz: {cmd[2]:.2f}     ", end="")
+
+            if lift_requested:
+                _lift_robot(model, data, 0.1, last_action, cmd)
+                lift_requested = False
+                if viewer is not None:
+                    viewer.opt.geomgroup[:] = 1
+                print("\n[Lift] Raised robot by 0.10m.")
+                print(f"\r[Command] vx: {cmd[0]:.2f}, vy: {cmd[1]:.2f}, wz: {cmd[2]:.2f}     ", end="")
 
             if step % sim_steps_per_ctrl == 0:
                 obs = _build_obs(
@@ -315,6 +440,7 @@ def main() -> None:
             mujoco.mj_step(model, data)  # type: ignore[attr-defined]
 
             if viewer is not None:
+                viewer.opt.geomgroup[:] = 1
                 viewer.sync()
 
             step += 1

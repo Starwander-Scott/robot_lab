@@ -60,7 +60,23 @@
 - --control-dt：控制周期（默认 0.02）
 - --sim-dt：仿真步长（默认使用 XML 内设置）
 - --kp / --kd：PD 参数（Go2 训练默认：kp=25, kd=0.5）
+- --spawn-x / --spawn-y / --spawn-z：覆盖机器人出生点
+- --spawn-yaw-deg：覆盖机器人初始朝向
 - --base-body：底座 body 名称（默认 base_link）
+
+家庭场景说明：
+
+- `scene_home.xml`
+- `scene_home_300.xml`
+- `scene_home_300_nav.xml`
+
+这几个家庭场景会自动把 Go2 出生点放到室内开阔区域，避免默认原点出生导致贴墙卡住。
+当前默认出生点约为：
+
+- `x=5.2`
+- `y=1.4`
+- `z=0.45`
+- `yaw=0`
 
 示例（带可视化）：
 
@@ -68,8 +84,31 @@
   /home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py \
     --mjcf /home/oepr/robot_lab/assets/go2/scene.xml \
     --policy /home/oepr/robot_lab/logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt \
-    --duration 20 \
+  --duration 20 \
+  --control-mode pd \
+  --render
+
+示例（300 平米家庭导航场景）：
+
+- 运行：
+  /home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py \
+    --mjcf /home/oepr/robot_lab/assets/go2/scene_home_300_nav.xml \
+    --policy /home/oepr/robot_lab/logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt \
+    --duration 45 \
     --control-mode pd \
+    --render
+
+示例（手动指定出生点）：
+
+- 运行：
+  /home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py \
+    --mjcf /home/oepr/robot_lab/assets/go2/scene_home_300_nav.xml \
+    --policy /home/oepr/robot_lab/logs/rsl_rl/unitree_go2_rough/2026-03-28_11-40-49/policy_mujoco.pt \
+    --duration 45 \
+    --control-mode pd \
+    --spawn-x 5.2 \
+    --spawn-y 1.4 \
+    --spawn-yaw-deg 0 \
     --render
 
 ## 4.1 使用手柄控制

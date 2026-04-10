@@ -1,0 +1,117 @@
+<mujoco model="go2 rough terrain">
+  <include file="go2.xml"/>
+
+  <statistic center="1.5 0 0.2" extent="3"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="-130" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge"
+      rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+
+    <!-- terrain materials -->
+    <texture type="cube" name="grass_tex" builtin="flat" rgb1="0.35 0.55 0.25" rgb2="0.3 0.5 0.2" width="128" height="128"/>
+    <material name="grass" texture="grass_tex" rgba="0.35 0.55 0.25 1"/>
+    <texture type="cube" name="rock_tex" builtin="flat" rgb1="0.55 0.50 0.45" rgb2="0.5 0.45 0.4" width="128" height="128"/>
+    <material name="rock" texture="rock_tex"/>
+    <texture type="cube" name="wood_tex" builtin="flat" rgb1="0.7 0.5 0.3" rgb2="0.65 0.45 0.25" width="128" height="128"/>
+    <material name="wood" texture="wood_tex"/>
+
+    <!-- height field for organic bumpy terrain -->
+    <hfield name="rough_hfield" size="1.5 1.5 0.15 0.01" nrow="50" ncol="50"/>
+  </asset>
+
+  <worldbody>
+    <light pos="2 0 3" dir="0 0 -1" directional="true"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+    <!-- ============================================================ -->
+    <!--  ZONE 1 (+X): Pyramid Stairs (matches IsaacLab stair terrain) -->
+    <!--  ascending then descending, step height ~5cm, depth 30cm     -->
+    <!-- ============================================================ -->
+    <!-- ascending stairs -->
+    <geom pos="1.0 0 0.025"  type="box" size="0.15 1.0 0.025" material="wood"/>
+    <geom pos="1.3 0 0.05"   type="box" size="0.15 1.0 0.05"  material="wood"/>
+    <geom pos="1.6 0 0.075"  type="box" size="0.15 1.0 0.075" material="wood"/>
+    <geom pos="1.9 0 0.10"   type="box" size="0.15 1.0 0.10"  material="wood"/>
+    <geom pos="2.2 0 0.125"  type="box" size="0.15 1.0 0.125" material="wood"/>
+    <!-- plateau -->
+    <geom pos="2.65 0 0.15"  type="box" size="0.30 1.0 0.15"  material="wood"/>
+    <!-- descending stairs -->
+    <geom pos="3.1 0 0.125"  type="box" size="0.15 1.0 0.125" material="wood"/>
+    <geom pos="3.4 0 0.10"   type="box" size="0.15 1.0 0.10"  material="wood"/>
+    <geom pos="3.7 0 0.075"  type="box" size="0.15 1.0 0.075" material="wood"/>
+    <geom pos="4.0 0 0.05"   type="box" size="0.15 1.0 0.05"  material="wood"/>
+    <geom pos="4.3 0 0.025"  type="box" size="0.15 1.0 0.025" material="wood"/>
+
+    <!-- ============================================================ -->
+    <!--  ZONE 2 (+Y): Sloped Terrain (pyramid slopes)               -->
+    <!--  ~15 degree incline, similar to IsaacLab slope terrain       -->
+    <!-- ============================================================ -->
+    <!-- up-slope -->
+    <geom pos="0 2.0 0.13" type="box" size="0.8 0.6 0.02" euler="15 0 0" material="grass"/>
+    <!-- plateau -->
+    <geom pos="0 2.9 0.26" type="box" size="0.8 0.35 0.02" material="grass"/>
+    <!-- down-slope -->
+    <geom pos="0 3.8 0.13" type="box" size="0.8 0.6 0.02" euler="-15 0 0" material="grass"/>
+
+    <!-- ============================================================ -->
+    <!--  ZONE 3 (-Y): Random Uniform Terrain (discrete obstacles)   -->
+    <!--  random boxes 2-6cm high, simulating rubble/rough ground     -->
+    <!-- ============================================================ -->
+    <!-- row 1 -->
+    <geom pos="-0.3 -1.4 0.02"  type="box" size="0.20 0.18 0.020" euler="3 0 12"   material="rock"/>
+    <geom pos=" 0.1 -1.6 0.03"  type="box" size="0.15 0.22 0.030" euler="-5 2 0"   material="rock"/>
+    <geom pos=" 0.4 -1.3 0.025" type="box" size="0.25 0.15 0.025" euler="0 8 -10"  material="rock"/>
+    <geom pos="-0.1 -1.9 0.04"  type="box" size="0.18 0.18 0.040" euler="7 -3 5"   material="rock"/>
+    <geom pos=" 0.35 -1.8 0.015" type="box" size="0.22 0.20 0.015" euler="-2 6 15" material="rock"/>
+    <!-- row 2 -->
+    <geom pos="-0.4 -2.2 0.035" type="box" size="0.20 0.16 0.035" euler="10 0 -5"  material="rock"/>
+    <geom pos=" 0.0 -2.4 0.05"  type="box" size="0.15 0.20 0.050" euler="0 -10 8"  material="rock"/>
+    <geom pos=" 0.3 -2.1 0.02"  type="box" size="0.18 0.25 0.020" euler="-8 5 0"   material="rock"/>
+    <geom pos="-0.2 -2.6 0.045" type="box" size="0.22 0.18 0.045" euler="5 3 -12"  material="rock"/>
+    <geom pos=" 0.5 -2.5 0.03"  type="box" size="0.20 0.22 0.030" euler="-3 -7 20" material="rock"/>
+    <!-- row 3 -->
+    <geom pos="-0.5 -2.9 0.025" type="box" size="0.16 0.20 0.025" euler="6 -5 8"   material="rock"/>
+    <geom pos=" 0.1 -3.1 0.06"  type="box" size="0.20 0.15 0.060" euler="-4 8 -6"  material="rock"/>
+    <geom pos=" 0.4 -2.8 0.035" type="box" size="0.25 0.18 0.035" euler="0 -3 12"  material="rock"/>
+    <geom pos="-0.3 -3.3 0.04"  type="box" size="0.18 0.22 0.040" euler="8 0 -15"  material="rock"/>
+    <geom pos=" 0.2 -3.4 0.02"  type="box" size="0.22 0.16 0.020" euler="-6 10 0"  material="rock"/>
+
+    <!-- ============================================================ -->
+    <!--  ZONE 4 (-X): Stepping Stones / Gaps                        -->
+    <!--  isolated platforms with gaps, tests precise foot placement  -->
+    <!-- ============================================================ -->
+    <geom pos="-1.0  0.0  0.04" type="cylinder" size="0.18 0.04" material="rock"/>
+    <geom pos="-1.5  0.15 0.05" type="cylinder" size="0.16 0.05" material="rock"/>
+    <geom pos="-2.0 -0.10 0.06" type="cylinder" size="0.17 0.06" material="rock"/>
+    <geom pos="-2.5  0.05 0.07" type="cylinder" size="0.15 0.07" material="rock"/>
+    <geom pos="-3.0 -0.15 0.08" type="cylinder" size="0.18 0.08" material="rock"/>
+    <geom pos="-3.5  0.10 0.06" type="cylinder" size="0.16 0.06" material="rock"/>
+    <geom pos="-4.0  0.00 0.05" type="cylinder" size="0.17 0.05" material="rock"/>
+
+    <!-- ============================================================ -->
+    <!--  ZONE 5 (diagonal +X+Y): Wave / Bumpy Terrain via hfield    -->
+    <!--  procedural height field for organic uneven ground           -->
+    <!-- ============================================================ -->
+    <geom type="hfield" hfield="rough_hfield" pos="2.5 3.0 0.0" material="grass"/>
+
+    <!-- ============================================================ -->
+    <!--  ZONE 6 (diagonal +X-Y): Mixed narrow passages              -->
+    <!--  walls creating corridors the robot must navigate            -->
+    <!-- ============================================================ -->
+    <!-- corridor walls -->
+    <geom pos="2.0 -2.0 0.15" type="box" size="1.5 0.02 0.15" material="rock"/>
+    <geom pos="2.0 -2.5 0.15" type="box" size="1.5 0.02 0.15" material="rock"/>
+    <!-- obstacles inside corridor -->
+    <geom pos="1.5 -2.25 0.03" type="box" size="0.15 0.15 0.03" euler="0 0 30" material="rock"/>
+    <geom pos="2.3 -2.25 0.04" type="box" size="0.12 0.12 0.04" euler="0 0 -20" material="rock"/>
+    <geom pos="3.0 -2.25 0.05" type="cylinder" size="0.10 0.05" material="rock"/>
+  </worldbody>
+</mujoco>

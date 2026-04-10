@@ -13,6 +13,8 @@ from robot_lab.tasks.manager_based.locomotion.velocity.velocity_env_cfg import L
 # use local assets
 from robot_lab.assets.unitree import UNITREE_GO2_CFG  # isort: skip
 
+import math
+
 
 @configclass
 class UnitreeGo2RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
@@ -119,7 +121,8 @@ class UnitreeGo2RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
         # Velocity-tracking rewards
         self.rewards.track_lin_vel_xy_exp.weight = 3.0
-        self.rewards.track_ang_vel_z_exp.weight = 1.5
+        self.rewards.track_ang_vel_z_exp.weight = 2.5    # amend 原 1.5 太小了 ，改成 2.5  ，让它更重视转向速度的跟踪
+        self.rewards.track_ang_vel_z_exp.params["std"] = math.sqrt(0.15)  # 更严格地跟踪角速度  原来 0.25 太大了
 
         # Others
         self.rewards.feet_air_time.weight = 0.1

@@ -1,0 +1,245 @@
+<mujoco model="go2 home environment 300sqm">
+  <include file="go2.xml"/>
+
+  <statistic center="11 7 0.6" extent="13"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="-130" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.8 0.85 0.9" rgb2="0.5 0.6 0.7" width="512" height="3072"/>
+
+    <texture type="2d" name="tile_tex" builtin="checker" mark="edge"
+      rgb1="0.85 0.82 0.78" rgb2="0.75 0.72 0.68" markrgb="0.9 0.88 0.85" width="300" height="300"/>
+    <material name="tile" texture="tile_tex" texuniform="true" texrepeat="14 12" reflectance="0.3"/>
+
+    <texture type="2d" name="wood_floor_tex" builtin="checker"
+      rgb1="0.65 0.45 0.25" rgb2="0.55 0.38 0.20" width="200" height="200"/>
+    <material name="wood_floor" texture="wood_floor_tex" texuniform="true" texrepeat="18 15" reflectance="0.15"/>
+
+    <texture type="2d" name="carpet_tex" builtin="flat"
+      rgb1="0.4 0.25 0.25" rgb2="0.35 0.2 0.2" width="128" height="128"/>
+    <material name="carpet" texture="carpet_tex" texuniform="true" reflectance="0.05"/>
+
+    <texture type="2d" name="carpet_blue_tex" builtin="flat"
+      rgb1="0.2 0.25 0.4" rgb2="0.18 0.22 0.35" width="128" height="128"/>
+    <material name="carpet_blue" texture="carpet_blue_tex" texuniform="true" reflectance="0.05"/>
+
+    <texture type="2d" name="marble_tex" builtin="checker" mark="cross"
+      rgb1="0.9 0.88 0.85" rgb2="0.82 0.80 0.77" markrgb="0.85 0.83 0.8" width="300" height="300"/>
+    <material name="marble" texture="marble_tex" texuniform="true" texrepeat="7 6" reflectance="0.5"/>
+
+    <texture type="cube" name="wall_tex" builtin="flat" rgb1="0.92 0.90 0.85" rgb2="0.92 0.90 0.85" width="128" height="128"/>
+    <material name="wall" texture="wall_tex"/>
+    <texture type="cube" name="wood_tex" builtin="flat" rgb1="0.55 0.35 0.18" rgb2="0.5 0.3 0.15" width="128" height="128"/>
+    <material name="wood" texture="wood_tex"/>
+    <texture type="cube" name="dark_wood_tex" builtin="flat" rgb1="0.35 0.2 0.1" rgb2="0.3 0.18 0.08" width="128" height="128"/>
+    <material name="dark_wood" texture="dark_wood_tex"/>
+    <texture type="cube" name="sofa_tex" builtin="flat" rgb1="0.35 0.45 0.55" rgb2="0.3 0.4 0.5" width="128" height="128"/>
+    <material name="sofa" texture="sofa_tex"/>
+    <texture type="cube" name="sofa_brown_tex" builtin="flat" rgb1="0.5 0.3 0.15" rgb2="0.45 0.27 0.12" width="128" height="128"/>
+    <material name="sofa_brown" texture="sofa_brown_tex"/>
+    <texture type="cube" name="chrome_tex" builtin="flat" rgb1="0.7 0.7 0.72" rgb2="0.65 0.65 0.67" width="128" height="128"/>
+    <material name="chrome" texture="chrome_tex" reflectance="0.4"/>
+    <texture type="cube" name="cabinet_tex" builtin="flat" rgb1="0.9 0.88 0.85" rgb2="0.85 0.83 0.8" width="128" height="128"/>
+    <material name="cabinet" texture="cabinet_tex"/>
+    <texture type="cube" name="counter_tex" builtin="flat" rgb1="0.3 0.3 0.3" rgb2="0.25 0.25 0.25" width="128" height="128"/>
+    <material name="counter" texture="counter_tex" reflectance="0.3"/>
+  </asset>
+
+  <!-- ================================================================ -->
+  <!--  LAYOUT: 22m x 14m = 308 sqm                                     -->
+  <!--                                                                  -->
+  <!--  South band (Y=0~6): living 10x6, kitchen 7x6, utility 5x6       -->
+  <!--  Hallway    (Y=6~8): central spine 22x2                          -->
+  <!--  North band (Y=8~14): master 9x6, bath 4x6, study/bed 9x6        -->
+  <!-- ================================================================ -->
+
+  <worldbody>
+    <light pos="5 3 2.4" dir="0 0 -1" directional="true"/>
+    <light pos="15 3 2.4" dir="0 0 -1" diffuse="0.5 0.5 0.5" specular="0.1 0.1 0.1"/>
+    <light pos="5 11 2.4" dir="0 0 -1" diffuse="0.5 0.5 0.5" specular="0.1 0.1 0.1"/>
+    <light pos="17 11 2.4" dir="0 0 -1" diffuse="0.5 0.5 0.5" specular="0.1 0.1 0.1"/>
+
+    <geom name="floor" size="0 0 0.01" type="plane" material="tile"/>
+
+    <!-- outer walls: 22m x 14m -->
+    <geom pos="2.0  -0.05 1.25" type="box" size="2.0  0.05 1.25" material="wall"/>
+    <geom pos="13.6 -0.05 1.25" type="box" size="8.4  0.05 1.25" material="wall"/>
+    <geom pos="11.0 14.05 1.25" type="box" size="11.0 0.05 1.25" material="wall"/>
+    <geom pos="-0.05 7.0 1.25" type="box" size="0.05 7.0 1.25" material="wall"/>
+    <geom pos="22.05 7.0 1.25" type="box" size="0.05 7.0 1.25" material="wall"/>
+
+    <!-- hallway walls -->
+    <geom pos="2.0   6.0 1.25" type="box" size="2.0   0.05 1.25" material="wall"/>
+    <geom pos="8.6   6.0 1.25" type="box" size="3.4   0.05 1.25" material="wall"/>
+    <geom pos="15.6  6.0 1.25" type="box" size="2.4   0.05 1.25" material="wall"/>
+    <geom pos="20.1  6.0 1.25" type="box" size="1.9   0.05 1.25" material="wall"/>
+
+    <geom pos="1.5   8.0 1.25" type="box" size="1.5   0.05 1.25" material="wall"/>
+    <geom pos="7.1   8.0 1.25" type="box" size="2.9   0.05 1.25" material="wall"/>
+    <geom pos="13.6  8.0 1.25" type="box" size="2.6   0.05 1.25" material="wall"/>
+    <geom pos="20.1  8.0 1.25" type="box" size="1.9   0.05 1.25" material="wall"/>
+
+    <!-- south band separators -->
+    <geom pos="10.0 1.5 1.25" type="box" size="0.05 1.5 1.25" material="wall"/>
+    <geom pos="10.0 5.1 1.25" type="box" size="0.05 0.9 1.25" material="wall"/>
+    <geom pos="17.0 1.5 1.25" type="box" size="0.05 1.5 1.25" material="wall"/>
+    <geom pos="17.0 5.1 1.25" type="box" size="0.05 0.9 1.25" material="wall"/>
+
+    <!-- north band separators -->
+    <geom pos="9.0  9.0  1.25" type="box" size="0.05 1.0 1.25" material="wall"/>
+    <geom pos="9.0  12.6 1.25" type="box" size="0.05 1.4 1.25" material="wall"/>
+    <geom pos="13.0 9.0  1.25" type="box" size="0.05 1.0 1.25" material="wall"/>
+    <geom pos="13.0 12.6 1.25" type="box" size="0.05 1.4 1.25" material="wall"/>
+
+    <!-- door thresholds -->
+    <geom pos="4.6  0.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="4.6  6.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="12.6 6.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="19.6 6.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="3.6  8.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="11.1 8.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="18.6 8.0  0.008" type="box" size="0.6 0.06 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="10.0 3.6  0.008" type="box" size="0.06 0.6 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="17.0 3.6  0.008" type="box" size="0.06 0.6 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="9.0  10.6 0.008" type="box" size="0.06 0.6 0.008" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="13.0 10.6 0.008" type="box" size="0.06 0.6 0.008" rgba="0.5 0.4 0.3 1"/>
+
+    <!-- room 1: living room 10x6 -->
+    <geom pos="5.0 3.0 0.005" type="box" size="5.0 3.0 0.005" material="wood_floor" contype="0" conaffinity="0"/>
+    <geom pos="3.8 3.0 0.012" type="box" size="2.9 1.9 0.007" material="carpet" friction="1.5 0.05 0.01" contype="0" conaffinity="0"/>
+    <geom pos="0.5 3.0 0.2" type="box" size="0.45 1.5 0.2" material="sofa"/>
+    <geom pos="0.08 3.0 0.45" type="box" size="0.06 1.5 0.25" material="sofa"/>
+    <geom pos="1.7 1.55 0.2" type="box" size="1.2 0.40 0.2" material="sofa"/>
+    <geom pos="1.7 1.18 0.45" type="box" size="1.2 0.06 0.25" material="sofa"/>
+    <geom pos="0.5 4.48 0.35" type="box" size="0.40 0.06 0.10" material="sofa"/>
+    <geom pos="2.88 1.55 0.35" type="box" size="0.06 0.35 0.10" material="sofa"/>
+    <geom pos="3.3 3.0 0.38" type="box" size="0.75 0.42 0.018" material="wood"/>
+    <geom pos="2.62 2.63 0.18" type="cylinder" size="0.025 0.18" material="chrome"/>
+    <geom pos="3.98 2.63 0.18" type="cylinder" size="0.025 0.18" material="chrome"/>
+    <geom pos="2.62 3.37 0.18" type="cylinder" size="0.025 0.18" material="chrome"/>
+    <geom pos="3.98 3.37 0.18" type="cylinder" size="0.025 0.18" material="chrome"/>
+    <geom pos="9.3 3.0 0.25" type="box" size="0.5 1.2 0.25" material="dark_wood"/>
+    <geom pos="9.5 3.0 0.7" type="box" size="0.02 0.8 0.35" rgba="0.1 0.1 0.1 1"/>
+    <geom pos="7.0 0.25 0.6" type="box" size="1.6 0.20 0.6" material="wood"/>
+    <geom pos="0.3 4.8 0.7" type="cylinder" size="0.03 0.7" material="chrome"/>
+    <geom pos="0.3 4.8 1.45" type="sphere" size="0.12" rgba="0.95 0.9 0.8 0.6"/>
+    <geom pos="7.8 4.5 0.72" type="box" size="0.95 0.55 0.02" material="wood"/>
+    <geom pos="6.9 4.0 0.35" type="box" size="0.04 0.04 0.35" material="wood"/>
+    <geom pos="8.7 4.0 0.35" type="box" size="0.04 0.04 0.35" material="wood"/>
+    <geom pos="6.9 5.0 0.35" type="box" size="0.04 0.04 0.35" material="wood"/>
+    <geom pos="8.7 5.0 0.35" type="box" size="0.04 0.04 0.35" material="wood"/>
+    <geom pos="7.0 4.5 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="8.6 4.5 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="7.8 3.9 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="7.8 5.1 0.22" type="box" size="0.20 0.20 0.22" material="wood"/>
+    <geom pos="4.6 0.25 0.5" type="box" size="0.6 0.20 0.5" material="wood"/>
+    <geom pos="3.5 0.2 0.15" type="box" size="0.5 0.15 0.15" material="wood"/>
+    <geom pos="3.8 0.5 0.03" type="box" size="0.08 0.04 0.03" euler="0 0 15" rgba="0.3 0.2 0.15 1"/>
+    <geom pos="4.0 0.55 0.03" type="box" size="0.09 0.04 0.03" euler="0 0 -10" rgba="0.2 0.2 0.25 1"/>
+    <geom pos="1.5 0.4 0.03" type="cylinder" size="0.12 0.03" rgba="0.7 0.2 0.2 1"/>
+    <geom pos="5.5 0.2 0.3" type="cylinder" size="0.08 0.3" material="chrome"/>
+
+    <!-- room 2: kitchen 7x6 -->
+    <geom pos="13.5 3.0 0.005" type="box" size="3.5 3.0 0.005" material="tile" contype="0" conaffinity="0"/>
+    <geom pos="16.5 2.5 0.42" type="box" size="0.45 2.5 0.42" material="cabinet"/>
+    <geom pos="16.5 2.5 0.85" type="box" size="0.50 2.55 0.01" material="counter"/>
+    <geom pos="13.4 5.5 0.42" type="box" size="2.6 0.45 0.42" material="cabinet"/>
+    <geom pos="13.4 5.5 0.85" type="box" size="2.65 0.50 0.01" material="counter"/>
+    <geom pos="13.4 2.7 0.42" type="box" size="0.9 0.7 0.42" material="cabinet"/>
+    <geom pos="13.4 2.7 0.85" type="box" size="0.95 0.75 0.01" material="counter"/>
+    <geom pos="12.4 1.8 0.3" type="cylinder" size="0.15 0.02" material="chrome"/>
+    <geom pos="12.4 1.8 0.15" type="cylinder" size="0.025 0.15" material="chrome"/>
+    <geom pos="14.4 1.8 0.3" type="cylinder" size="0.15 0.02" material="chrome"/>
+    <geom pos="14.4 1.8 0.15" type="cylinder" size="0.025 0.15" material="chrome"/>
+    <geom pos="16.5 5.2 0.9" type="box" size="0.40 0.45 0.9" rgba="0.88 0.88 0.90 1"/>
+    <geom pos="16.5 0.6 0.42" type="box" size="0.35 0.35 0.42" rgba="0.15 0.15 0.15 1"/>
+    <geom pos="11.4 4.4 0.76" type="box" size="0.85 0.50 0.03" material="wood"/>
+    <geom pos="10.7 3.95 0.37" type="box" size="0.04 0.04 0.37" material="wood"/>
+    <geom pos="12.1 3.95 0.37" type="box" size="0.04 0.04 0.37" material="wood"/>
+    <geom pos="10.7 4.85 0.37" type="box" size="0.04 0.04 0.37" material="wood"/>
+    <geom pos="12.1 4.85 0.37" type="box" size="0.04 0.04 0.37" material="wood"/>
+    <geom pos="10.5 4.4 0.22" type="box" size="0.18 0.18 0.22" material="wood"/>
+    <geom pos="12.3 4.4 0.22" type="box" size="0.18 0.18 0.22" material="wood"/>
+
+    <!-- room 3: utility / storage 5x6 -->
+    <geom pos="19.5 3.0 0.005" type="box" size="2.5 3.0 0.005" material="tile" contype="0" conaffinity="0"/>
+    <geom pos="18.0 0.6 0.42" type="box" size="0.35 0.35 0.42" rgba="0.9 0.9 0.92 1"/>
+    <geom pos="19.1 0.6 0.42" type="box" size="0.35 0.35 0.42" rgba="0.9 0.9 0.92 1"/>
+    <geom pos="21.2 3.0 0.8" type="box" size="0.5 2.0 0.8" material="chrome"/>
+    <geom pos="19.3 5.5 0.4" type="box" size="1.8 0.4 0.4" material="wood"/>
+    <geom pos="18.1 3.3 0.18" type="box" size="0.25 0.22 0.18" rgba="0.6 0.5 0.3 1"/>
+    <geom pos="18.8 4.0 0.22" type="box" size="0.26 0.18 0.22" rgba="0.5 0.4 0.3 1"/>
+    <geom pos="17.8 4.7 0.12" type="box" size="0.18 0.18 0.12" rgba="0.4 0.35 0.3 1"/>
+    <geom pos="20.0 2.1 0.35" type="cylinder" size="0.18 0.35" rgba="0.15 0.15 0.18 1"/>
+
+    <!-- hallway -->
+    <geom pos="11.0 7.0 0.006" type="box" size="11.0 1.0 0.006" material="marble" contype="0" conaffinity="0"/>
+    <geom pos="11.0 7.0 0.013" type="box" size="9.0 0.4 0.007" material="carpet" friction="1.2 0.05 0.01" contype="0" conaffinity="0"/>
+    <geom pos="7.0 6.2 0.35" type="box" size="0.8 0.15 0.015" material="dark_wood"/>
+    <geom pos="6.25 6.2 0.168" type="box" size="0.03 0.12 0.168" material="dark_wood"/>
+    <geom pos="7.75 6.2 0.168" type="box" size="0.03 0.12 0.168" material="dark_wood"/>
+    <geom pos="0.4 7.0 0.25" type="cylinder" size="0.15 0.25" rgba="0.6 0.35 0.2 1"/>
+    <geom pos="21.5 7.0 0.25" type="cylinder" size="0.15 0.25" rgba="0.6 0.35 0.2 1"/>
+    <geom pos="15.0 7.0 0.006" type="box" size="0.9 0.3 0.004" rgba="0.3 0.6 0.5 0.9"/>
+    <geom pos="5.0 7.5 0.1" type="box" size="0.2 0.15 0.1" rgba="0.8 0.6 0.1 1"/>
+    <geom pos="18.8 7.4 0.03" type="cylinder" size="0.1 0.03" rgba="0.3 0.5 0.7 1" contype="0" conaffinity="0"/>
+
+    <!-- room 4: master bedroom 9x6 -->
+    <geom pos="4.5 11.0 0.005" type="box" size="4.5 3.0 0.005" material="wood_floor" contype="0" conaffinity="0"/>
+    <geom pos="4.5 11.0 0.012" type="box" size="2.8 1.9 0.007" material="carpet_blue" friction="1.5 0.05 0.01" contype="0" conaffinity="0"/>
+    <geom pos="4.5 13.1 0.18" type="box" size="1.25 0.8 0.18" material="dark_wood"/>
+    <geom pos="4.5 12.95 0.40" type="box" size="1.20 1.0 0.06" rgba="0.92 0.90 0.88 1"/>
+    <geom pos="4.5 13.85 0.6" type="box" size="1.25 0.05 0.35" material="dark_wood"/>
+    <geom pos="3.9 13.45 0.48" type="box" size="0.3 0.2 0.06" rgba="0.95 0.95 0.97 1"/>
+    <geom pos="5.1 13.45 0.48" type="box" size="0.3 0.2 0.06" rgba="0.95 0.95 0.97 1"/>
+    <geom pos="2.7 13.45 0.28" type="box" size="0.25 0.25 0.28" material="dark_wood"/>
+    <geom pos="6.3 13.45 0.28" type="box" size="0.25 0.25 0.28" material="dark_wood"/>
+    <geom pos="0.35 11.1 1.0" type="box" size="0.30 1.7 1.0" material="dark_wood"/>
+    <geom pos="7.4 13.45 0.35" type="box" size="0.9 0.3 0.35" material="dark_wood"/>
+    <geom pos="7.4 13.85 0.9" type="box" size="0.55 0.01 0.35" rgba="0.7 0.75 0.8 0.8"/>
+    <geom pos="1.7 9.1 0.2" type="box" size="0.35 0.35 0.2" material="sofa_brown"/>
+    <geom pos="1.38 9.1 0.45" type="box" size="0.05 0.35 0.25" material="sofa_brown"/>
+    <geom pos="2.6 9.1 0.3" type="cylinder" size="0.2 0.015" material="wood"/>
+    <geom pos="2.6 9.1 0.143" type="cylinder" size="0.03 0.143" material="chrome"/>
+    <geom pos="7.8 9.4 0.2" type="cylinder" size="0.2 0.2" rgba="0.6 0.55 0.5 1"/>
+
+    <!-- room 5: bathroom 4x6 -->
+    <geom pos="11.0 11.0 0.006" type="box" size="2.0 3.0 0.006" material="marble" contype="0" conaffinity="0"/>
+    <geom pos="11.0 13.2 0.3" type="box" size="0.45 0.7 0.3" rgba="0.95 0.95 0.97 1"/>
+    <geom pos="9.5 11.0 0.4" type="box" size="0.4 0.6 0.4" material="cabinet"/>
+    <geom pos="9.5 11.0 0.81" type="box" size="0.45 0.65 0.01" material="counter"/>
+    <geom pos="12.2 9.6 0.2" type="box" size="0.22 0.3 0.2" rgba="0.95 0.95 0.97 1"/>
+    <geom pos="12.0 12.5 0.6" type="box" size="0.3 0.8 0.02" material="chrome"/>
+    <geom pos="10.2 13.0 0.65" type="box" size="0.35 0.02 0.35" rgba="0.75 0.8 0.85 0.8"/>
+
+    <!-- room 6: study / bedroom 9x6 -->
+    <geom pos="17.5 11.0 0.01" type="box" size="4.5 3.0 0.01" material="carpet_blue" friction="1.5 0.05 0.01" contype="0" conaffinity="0"/>
+    <geom pos="20.7 12.5 0.18" type="box" size="0.7 1.0 0.18" material="wood"/>
+    <geom pos="20.7 12.5 0.38" type="box" size="0.65 0.95 0.05" rgba="0.92 0.90 0.88 1"/>
+    <geom pos="20.7 13.45 0.55" type="box" size="0.7 0.05 0.30" material="wood"/>
+    <geom pos="19.7 13.5 0.25" type="box" size="0.2 0.2 0.25" material="wood"/>
+    <geom pos="15.4 9.6 0.72" type="box" size="1.2 0.45 0.02" material="wood"/>
+    <geom pos="14.3 9.6 0.35" type="box" size="0.04 0.35 0.35" material="wood"/>
+    <geom pos="16.5 9.6 0.35" type="box" size="0.04 0.35 0.35" material="wood"/>
+    <geom pos="15.4 10.3 0.22" type="cylinder" size="0.22 0.02" rgba="0.2 0.2 0.2 1"/>
+    <geom pos="15.4 10.3 0.11" type="cylinder" size="0.03 0.11" material="chrome"/>
+    <geom pos="17.7 13.7 0.9" type="box" size="3.2 0.25 0.9" material="wood"/>
+    <geom pos="13.6 12.0 0.9" type="box" size="0.4 1.1 0.9" material="wood"/>
+    <geom pos="18.0 10.0 0.2" type="sphere" size="0.35" rgba="0.7 0.3 0.2 1"/>
+    <geom pos="17.2 11.0 0.25" type="box" size="0.35 0.35 0.25" rgba="0.25 0.25 0.28 1"/>
+    <geom pos="14.2 12.4 0.6" type="box" size="0.45 1.2 0.02" material="chrome"/>
+
+    <!-- scattered obstacles -->
+    <geom pos="5.8 2.0 0.15" type="box" size="0.15 0.1 0.15" euler="0 -15 20" rgba="0.2 0.3 0.5 1"/>
+    <geom pos="0.6 5.4 0.05" type="cylinder" size="0.3 0.05" rgba="0.5 0.35 0.25 1"/>
+    <geom pos="11.4 1.6 0.22" type="cylinder" size="0.15 0.02" material="wood"/>
+    <geom pos="11.4 1.6 0.1" type="cylinder" size="0.025 0.1" material="chrome"/>
+    <geom pos="16.9 2.8 0.04" type="box" size="0.12 0.08 0.04" euler="0 0 18" rgba="0.35 0.22 0.18 1"/>
+    <geom pos="9.4 6.6 0.05" type="cylinder" size="0.12 0.05" rgba="0.45 0.3 0.22 1"/>
+  </worldbody>
+</mujoco>
