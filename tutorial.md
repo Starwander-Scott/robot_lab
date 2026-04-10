@@ -310,7 +310,30 @@ pip install torch numpy mujoco
 
 `tensorboard --logdir=/home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-02_11-49-52`
 
-`/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py --mjcf assets/go2/scene.xml --policy /home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-03_12-26-48/exported/policy.pt --duration 2000 --control-mode pd --cmd-vx 0.5 --render `
+
+
+python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Unitree-Go2-v0 --checkpoint /home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-03_12-26-48/model_42000.pt
+
+/home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-02_11-49-52/exported/policy.pt
+
+
+
+
+
+`/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy.py --mjcf assets/go2/scene.xml --policy /home/oepr/robot_lab/logs/rsl_rl/unitree_go2_flat/2026-04-02_11-49-52/exported/policy.pt --duration 2000 --control-mode pd --cmd-vx 0.5 --render `
+
+/home/oepr/robot_lab/.venv/bin/python scripts/mujoco/verify_go2_policy_keyboard.py --mjcf assets/go2/scene_obstacles.xml --policy logs/rsl_rl/unitree_go2_flat/2026-04-02_11-49-52/policy_mujoco.pt --duration 2000 --control-mode pd --render
+
+
+
+
+
+
+
+
+
+
+
 
 今天训的，效果不好，向前和向左都会偏，同时注意，可以直接play相应的pt，能够在export下自动生成mujoco版本的模型文件
 
